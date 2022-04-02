@@ -10,6 +10,7 @@ import (
 	"pipi.com/gogf/pipi-gf-demo/internal/consts"
 	"pipi.com/gogf/pipi-gf-demo/internal/controller"
 	"pipi.com/gogf/pipi-gf-demo/internal/service"
+	"github.com/gogf/gf/v2/os/glog"
 )
 
 var (
@@ -19,6 +20,22 @@ var (
 		Brief: "start http server of simple goframe demos",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
+			s.BindHandler("/ws", func(r *ghttp.Request) {
+				ws, err := r.WebSocket()
+				if err != nil {
+					glog.Error(ctx,err)
+					r.Exit()
+				}
+				for {
+					msgType, msg, err := ws.ReadMessage()
+					if err != nil {
+						return
+					}
+					if err = ws.WriteMessage(msgType, msg); err != nil {
+						return
+					}
+				}
+			})
 			s.Use(ghttp.MiddlewareHandlerResponse)
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				// Group middlewares.

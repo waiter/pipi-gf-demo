@@ -58,3 +58,7 @@ git clone https://github.com/waiter/pipi-gf-demo
 - 正式环境：
   - 配置文件：`manifest/config/config.prod.yaml`
   - 启动命令：`go run main.go --gf.gcfg.file=config.prod.yaml`或者`make prod`
+
+## 开发时`WebSocket`调试
+
+启动服务后，访问`http://localhost:8199`即可
