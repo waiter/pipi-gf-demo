@@ -21,6 +21,7 @@
     <div>
         <button class="btn btn-primary" id="ping" >PING</button>
         <button class="btn btn-primary" id="add" >Test Add</button>
+        <button class="btn btn-primary" id="push" >主动推送</button>
     </div>
 </div>
 </body>
@@ -111,6 +112,9 @@
                 cmd: 'testAdd',
                 data: [1, Math.ceil(Math.random() * 100), 3],
             }));
+        });
+        $("#push").on("click", function () {
+            fetch('/push').then((e) => console.log(e))
         });
     })
 

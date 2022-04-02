@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/gogf/gf/v2/net/ghttp"
-	"pipi.com/gogf/pipi-gf-demo/internal/service/ws"
+	"pipi.com/gogf/pipi-gf-demo/internal/service/socket"
 	"pipi.com/gogf/pipi-gf-demo/internal/utils"
 )
 
@@ -20,5 +20,5 @@ func (c *cWebSocket) Upgrade(r *ghttp.Request) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	unique := "ws-" + utils.RandString(7)
-	ws.CreateConnection(unique, websocket, ctx, cancel)
+	socket.CreateWebConnection(unique, websocket, ctx, cancel)
 }

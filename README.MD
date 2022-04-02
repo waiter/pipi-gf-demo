@@ -90,4 +90,4 @@ git clone https://github.com/waiter/pipi-gf-demo
 ```JSON
 {"cmd":"add","data":82,"pack":1648906839,"unique":"ws-RFbD56T"}
 ```
-另外，后端只需要在`internal/service/ws/logic.go`中添加相关逻辑即可
+另外，后端只需要在`internal/service/socket/webLogic.go`中添加相关逻辑即可

@@ -10,6 +10,7 @@ import (
 	"pipi.com/gogf/pipi-gf-demo/internal/consts"
 	"pipi.com/gogf/pipi-gf-demo/internal/controller"
 	"pipi.com/gogf/pipi-gf-demo/internal/service"
+	"pipi.com/gogf/pipi-gf-demo/internal/service/socket"
 )
 
 var (
@@ -31,6 +32,12 @@ var (
 				group.Bind(
 					controller.User,
 				)
+				group.ALL("/push", func(r *ghttp.Request) {
+					socket.SocketManager.BroadcastMsg(g.Map{
+						"cmd":  "push",
+						"data": "nothing",
+					})
+				})
 				// Special handler that needs authentication.
 				group.Group("/", func(group *ghttp.RouterGroup) {
 					group.Middleware(service.Middleware().Auth)

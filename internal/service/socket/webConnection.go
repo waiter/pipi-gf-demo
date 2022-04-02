@@ -1,4 +1,4 @@
-package ws
+package socket
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"pipi.com/gogf/pipi-gf-demo/internal/consts"
 )
 
-type Connection struct {
+type WebConnection struct {
 	Socket    *ghttp.WebSocket
 	closed    bool
 	Unique    string
@@ -24,8 +24,8 @@ type Connection struct {
 	HeartBeat *gtimer.Entry
 }
 
-func CreateConnection(unique string, socket *ghttp.WebSocket, ctx context.Context, ctxClose func()) *Connection {
-	client := &Connection{
+func CreateWebConnection(unique string, socket *ghttp.WebSocket, ctx context.Context, ctxClose func()) *WebConnection {
+	client := &WebConnection{
 		Socket:    socket,
 		closed:    false,
 		Unique:    unique,
@@ -34,19 +34,20 @@ func CreateConnection(unique string, socket *ghttp.WebSocket, ctx context.Contex
 		HeartBeat: nil,
 	}
 	client.HeartBeat = HeartBeat(client)
+	SocketManager.AddWebConnection(client)
 	go client.read()
 	client.log("connected")
 	return client
 }
 
-func HeartBeat(client *Connection) *gtimer.Entry {
+func HeartBeat(client *WebConnection) *gtimer.Entry {
 	return gtimer.AddSingleton(client.Ctx, time.Second*consts.WebSocketHeartBeatTime, func(ctx context.Context) {
 		client.log("heart beat close")
 		client.Close()
 	})
 }
 
-func (c *Connection) Close() {
+func (c *WebConnection) Close() {
 	if gmlock.TryLock(c.Unique) {
 		if !c.closed {
 			_ = c.Socket.Close()
@@ -54,13 +55,14 @@ func (c *Connection) Close() {
 			//必须优先关闭读写协程
 			c.CtxClose()
 			c.HeartBeat.Close()
+			SocketManager.RemoveWebConnection(c)
 			c.log("closed")
 		}
 		gmlock.Unlock(c.Unique)
 	}
 }
 
-func (c *Connection) read() {
+func (c *WebConnection) read() {
 	for {
 		_, msg, err := c.Socket.ReadMessage()
 		if err != nil {
@@ -88,11 +90,11 @@ func (c *Connection) read() {
 			c.writeError(err.Error())
 			continue
 		}
-		c.writePack(result)
+		c.WritePack(result)
 	}
 }
 
-func (c *Connection) write(msg []byte) {
+func (c *WebConnection) write(msg []byte) {
 	err := c.Socket.WriteMessage(1, msg)
 	if err != nil {
 		c.log("write error")
@@ -100,11 +102,11 @@ func (c *Connection) write(msg []byte) {
 	}
 }
 
-func (c *Connection) log(msg string) {
-	glog.Print(c.Ctx, "【WebSocket Connection】"+c.Unique+": "+msg)
+func (c *WebConnection) log(msg string) {
+	glog.Print(c.Ctx, "【WebSocket WebConnection】"+c.Unique+": "+msg)
 }
 
-func (c *Connection) writePack(data g.Map) {
+func (c *WebConnection) WritePack(data g.Map) {
 	data["pack"] = time.Now().Unix()
 	data["unique"] = c.Unique
 	encode, err := gjson.Encode(data)
@@ -114,9 +116,9 @@ func (c *Connection) writePack(data g.Map) {
 	c.write(encode)
 }
 
-func (c *Connection) writeError(msg string) {
+func (c *WebConnection) writeError(msg string) {
 	data := make(map[string]interface{})
 	data["cmd"] = "error"
 	data["msg"] = msg
-	c.writePack(data)
+	c.WritePack(data)
 }
