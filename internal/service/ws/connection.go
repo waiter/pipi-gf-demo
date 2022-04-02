@@ -2,13 +2,17 @@ package ws
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gmlock"
 	"github.com/gogf/gf/v2/os/gtimer"
+	"pipi.com/gogf/pipi-gf-demo/internal/consts"
 )
 
 type Connection struct {
@@ -36,7 +40,7 @@ func CreateConnection(unique string, socket *ghttp.WebSocket, ctx context.Contex
 }
 
 func HeartBeat(client *Connection) *gtimer.Entry {
-	return gtimer.AddSingleton(client.Ctx, time.Second*60, func(ctx context.Context) {
+	return gtimer.AddSingleton(client.Ctx, time.Second*consts.WebSocketHeartBeatTime, func(ctx context.Context) {
 		client.log("heart beat close")
 		client.Close()
 	})
@@ -69,7 +73,22 @@ func (c *Connection) read() {
 			c.write([]byte("pong"))
 			continue
 		}
-		c.write(msg)
+		data := gjson.New(msg)
+		if data.IsNil() {
+			c.writeError("empty:" + string(msg))
+			continue
+		}
+		cmd := data.Get("cmd", "").String()
+		if len(cmd) == 0 {
+			c.writeError("no cmd:" + string(msg))
+			continue
+		}
+		result, err := Call(cmd, data, c)
+		if err != nil {
+			c.writeError(err.Error())
+			continue
+		}
+		c.writePack(result)
 	}
 }
 
@@ -82,5 +101,22 @@ func (c *Connection) write(msg []byte) {
 }
 
 func (c *Connection) log(msg string) {
-	glog.Print(c.Ctx, "【WebSocket Connection】" + c.Unique + ": " + msg)
+	glog.Print(c.Ctx, "【WebSocket Connection】"+c.Unique+": "+msg)
+}
+
+func (c *Connection) writePack(data g.Map) {
+	data["pack"] = time.Now().Unix()
+	data["unique"] = c.Unique
+	encode, err := gjson.Encode(data)
+	if err != nil {
+		fmt.Println(err)
+	}
+	c.write(encode)
+}
+
+func (c *Connection) writeError(msg string) {
+	data := make(map[string]interface{})
+	data["cmd"] = "error"
+	data["msg"] = msg
+	c.writePack(data)
 }

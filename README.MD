@@ -59,6 +59,35 @@ git clone https://github.com/waiter/pipi-gf-demo
   - 配置文件：`manifest/config/config.prod.yaml`
   - 启动命令：`go run main.go --gf.gcfg.file=config.prod.yaml`或者`make prod`
 
-## 开发时`WebSocket`调试
+## `WebSocket`相关说明
+
+### 如何调试
 
 启动服务后，访问`http://localhost:8199`即可
+
+### 关于心跳
+
+- 当前需要前端每隔一定时间（比`internal/consts/consts.go`中定义的`WebSocketHeartBeatTime`短即可）给服务端发送心跳包，直接发送内容为`ping`的包即可
+- 另外，所有前端发送的包（不只是心跳包）都会刷新后端记录本`WebSocket`的超时时间
+
+### 消息格式
+
+#### 前端
+前端给后端主要以**JSON形式传递**：
+- `cmd`：本次命令类型
+- `data`: 本次携带数据
+
+例如：
+```JSON
+{"cmd":"testAdd","data":[1,78,3]}
+```
+#### 后端
+后端回包格式与前端一致，会额外增加：
+- `unique`：本WebSocket唯一ID
+- `pack`：服务端发出时间
+
+例如
+```JSON
+{"cmd":"add","data":82,"pack":1648906839,"unique":"ws-RFbD56T"}
+```
+另外，后端只需要在`internal/service/ws/logic.go`中添加相关逻辑即可

@@ -20,6 +20,7 @@
     <h3>快捷操作</h3>
     <div>
         <button class="btn btn-primary" id="ping" >PING</button>
+        <button class="btn btn-primary" id="add" >Test Add</button>
     </div>
 </div>
 </body>
@@ -104,6 +105,12 @@
 
         $("#ping").on("click", function () {
             send("ping");
+        });
+        $("#add").on("click", function () {
+            send(JSON.stringify({
+                cmd: 'testAdd',
+                data: [1, Math.ceil(Math.random() * 100), 3],
+            }));
         });
     })
 
