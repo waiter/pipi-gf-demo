@@ -15,7 +15,7 @@ git clone https://github.com/waiter/pipi-gf-demo
 
 ### 5. 安装以来`go mod tidy`
 
-### 6. 启动`go run main.go`，正常情况可以看到以下日志：
+### 6. 使用`go run main.go`或者`make dev`来启动，正常情况可以看到以下日志：
 ```
   ADDRESS | METHOD |        ROUTE         |                                  HANDLER                                   |         MIDDLEWARE           
 ----------|--------|----------------------|----------------------------------------------------------------------------|------------------------------
@@ -47,3 +47,14 @@ git clone https://github.com/waiter/pipi-gf-demo
           |        |                      |                                                                            | service.(*sMiddleware).CORS  
 ----------|--------|----------------------|----------------------------------------------------------------------------|------------------------------
 ```
+
+## 多环境配置
+
+当前支持两种环境：
+
+- 开发环境：
+  - 配置文件：`manifest/config/config.yaml`
+  - 启动命令：`go run main.go`或者`make dev`
+- 正式环境：
+  - 配置文件：`manifest/config/config.prod.yaml`
+  - 启动命令：`go run main.go --gf.gcfg.file=config.prod.yaml`或者`make prod`

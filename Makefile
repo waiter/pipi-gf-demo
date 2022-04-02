@@ -69,3 +69,13 @@ deploy:
 	kubectl   patch -n $(NAMESPACE) deployment/$(DEPLOY_NAME) -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"$(shell date +%s)\"}}}}}";
 
 
+# run dev
+.PHONY: dev
+dev: 
+	go run .
+
+# run prod
+.PHONY: prod
+prod: 
+	go run . --gf.gcfg.file=config.prod.yaml
+
