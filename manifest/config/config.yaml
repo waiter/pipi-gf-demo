@@ -6,6 +6,7 @@ server:
   accessLogEnabled:    true
   openapiPath:         "/api.json"
   swaggerPath:         "/swagger"
+  searchPaths:         "/static" 
 
 # Global logging.
 logger:
