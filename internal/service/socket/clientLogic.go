@@ -7,7 +7,8 @@ import (
 )
 
 var clientLogic = map[string]func(data *gjson.Json, c *ClientConnection) (g.Map, error){
-	"testAdd": testAddClient,
+	"testAdd":  testAddClient,
+	"testPush": testClientPush,
 }
 
 func CallClientLogic(cmd string, data *gjson.Json, c *ClientConnection) (g.Map, error) {
@@ -27,4 +28,12 @@ func testAddClient(data *gjson.Json, c *ClientConnection) (g.Map, error) {
 	}
 	back["data"] = sum
 	return back, nil
+}
+
+func testClientPush(data *gjson.Json, c *ClientConnection) (g.Map, error) {
+	back := g.Map{}
+	back["cmd"] = "testPush"
+	back["data"] = "yyyyyyyyy"
+	SocketManager.Push2Web(c, back)
+	return nil, nil
 }

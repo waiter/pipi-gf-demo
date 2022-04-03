@@ -19,16 +19,18 @@ type ClientConnection struct {
 	Socket    *gtcp.Conn
 	closed    bool
 	Unique    string
+	Name      string
 	Ctx       context.Context
 	CtxClose  func()
 	HeartBeat *gtimer.Entry
 }
 
-func CreateClientConnection(unique string, socket *gtcp.Conn, ctx context.Context, ctxClose func()) *ClientConnection {
+func CreateClientConnection(unique string, socket *gtcp.Conn, ctx context.Context, ctxClose func(), name string) *ClientConnection {
 	client := &ClientConnection{
 		Socket:    socket,
 		closed:    false,
 		Unique:    unique,
+		Name:      name,
 		Ctx:       ctx,
 		CtxClose:  ctxClose,
 		HeartBeat: nil,
@@ -64,7 +66,7 @@ func (c *ClientConnection) Close() {
 
 func (c *ClientConnection) read() {
 	for {
-		msg, err := c.Socket.Recv(-1)
+		msg, err := c.Socket.RecvLine()
 		if err != nil {
 			c.log("read error")
 			c.Close()
@@ -90,11 +92,14 @@ func (c *ClientConnection) read() {
 			c.writeError(err.Error())
 			continue
 		}
-		c.WritePack(result)
+		if result != nil {
+			c.WritePack(result)
+		}
 	}
 }
 
 func (c *ClientConnection) write(msg []byte) {
+	msg = append(msg, []byte("\n")...)
 	err := c.Socket.Send(msg)
 	if err != nil {
 		c.log("write error")

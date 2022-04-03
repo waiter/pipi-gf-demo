@@ -63,7 +63,7 @@ git clone https://github.com/waiter/pipi-gf-demo
 
 ### 如何调试
 
-启动服务后，访问`http://localhost:8199`即可
+启动服务后，访问`http://localhost:8199`即可，当前需要先创建一个用户名为`pipi`，密码为`123456`的帐号
 
 ### 关于心跳
 

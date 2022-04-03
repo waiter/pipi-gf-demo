@@ -33,7 +33,7 @@ var (
 				)
 				// forTest
 				group.ALL("/push", func(r *ghttp.Request) {
-					socket.SocketManager.BroadcastMsg(g.Map{
+					socket.SocketManager.BroadcastMsg2Web(g.Map{
 						"cmd":  "push",
 						"data": "nothing",
 					})

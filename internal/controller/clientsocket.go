@@ -20,6 +20,6 @@ func (c *cClientSocket) Start() {
 	go gtcp.NewServer(address.String(), func(conn *gtcp.Conn) {
 		ctx, cancel := context.WithCancel(context.Background())
 		unique := "cs-" + utils.RandString(7)
-		socket.CreateClientConnection(unique, conn, ctx, cancel)
+		socket.CreateClientConnection(unique, conn, ctx, cancel, "unknown")
 	}).Run()
 }

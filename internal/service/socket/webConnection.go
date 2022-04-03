@@ -90,7 +90,9 @@ func (c *WebConnection) read() {
 			c.writeError(err.Error())
 			continue
 		}
-		c.WritePack(result)
+		if result != nil {
+			c.WritePack(result)
+		}
 	}
 }
 

@@ -21,7 +21,9 @@
     <div>
         <button class="btn btn-primary" id="ping" >PING</button>
         <button class="btn btn-primary" id="add" >Test Add</button>
-        <button class="btn btn-primary" id="push" >主动推送</button>
+        <button class="btn btn-primary" id="push" >主动推送其他前端</button>
+        <button class="btn btn-primary" id="bind" >绑定客户端</button>
+        <button class="btn btn-primary" id="pushClient" >主动推送客户端</button>
     </div>
 </div>
 </body>
@@ -48,6 +50,7 @@
     function doWebSocket() {
         var url = "ws://" + location.host + "/ws";
         var ws  = new WebSocket(url);
+        var clients = {}
         try {
             // ws连接成功
             ws.onopen = function () {
@@ -72,6 +75,12 @@
             // ws数据返回处理
             ws.onmessage = function (result) {
                 showWaring("收到：" + result.data);
+                try {
+                    var tempData = JSON.parse(result.data)
+                    if (tempData.cmd === "updateClients") {
+                        clients = tempData.data || {}
+                    }
+                } catch (e) {}
             };
         } catch (e) {
             alert(e.message);
@@ -115,6 +124,22 @@
         });
         $("#push").on("click", function () {
             fetch('/push').then((e) => console.log(e))
+        });
+        $("#bind").on("click", function () {
+            if (Object.keys(clients).length > 0) {
+                send(JSON.stringify({
+                    cmd: "testBind",
+                    data: Object.keys(clients)[0]
+                }))
+            } else {
+                alert("无可绑定客户端")
+            }
+        });
+        $("#pushClient").on("click", function () {
+            send(JSON.stringify({
+                cmd: "testPush",
+                data: 'info'
+            }))
         });
     }
 

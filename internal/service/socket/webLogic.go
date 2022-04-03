@@ -7,7 +7,9 @@ import (
 )
 
 var webLogic = map[string]func(data *gjson.Json, c *WebConnection) (g.Map, error){
-	"testAdd": testAdd,
+	"testAdd":  testAdd,
+	"testBind": testBind,
+	"testPush": testPush,
 }
 
 func CallWebLogic(cmd string, data *gjson.Json, c *WebConnection) (g.Map, error) {
@@ -27,4 +29,24 @@ func testAdd(data *gjson.Json, c *WebConnection) (g.Map, error) {
 	}
 	back["data"] = sum
 	return back, nil
+}
+
+func testBind(data *gjson.Json, c *WebConnection) (g.Map, error) {
+	clientUnique := data.Get("data").String()
+	err := SocketManager.BindClient(c.Unique, clientUnique)
+	if err != nil {
+		return nil, err
+	}
+	back := g.Map{}
+	back["cmd"] = "bindSuccess"
+	back["data"] = clientUnique
+	return back, nil
+}
+
+func testPush(data *gjson.Json, c *WebConnection) (g.Map, error) {
+	back := g.Map{}
+	back["cmd"] = "testPush"
+	back["data"] = "nnnnnnn"
+	SocketManager.Push2Client(c, back)
+	return nil, nil
 }
