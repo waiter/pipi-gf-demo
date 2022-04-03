@@ -26,6 +26,11 @@ func (c *cUser) SignIn(ctx context.Context, req *v1.UserSignInReq) (res *v1.User
 		Passport: req.Passport,
 		Password: req.Password,
 	})
+	if err == nil {
+		res = &v1.UserSignInRes{
+			ContextUser: service.Context().Get(ctx).User,
+		}
+	}
 	return
 }
 

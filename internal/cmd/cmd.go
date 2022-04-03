@@ -20,7 +20,6 @@ var (
 		Brief: "start http server of simple goframe demos",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
-			s.BindHandler("/ws", controller.WebSocket.Upgrade)
 			s.Use(ghttp.MiddlewareHandlerResponse)
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				// Group middlewares.
@@ -32,6 +31,7 @@ var (
 				group.Bind(
 					controller.User,
 				)
+				// forTest
 				group.ALL("/push", func(r *ghttp.Request) {
 					socket.SocketManager.BroadcastMsg(g.Map{
 						"cmd":  "push",
@@ -43,6 +43,7 @@ var (
 					group.Middleware(service.Middleware().Auth)
 					group.ALLMap(g.Map{
 						"/user/profile": controller.User.Profile,
+						"/ws":           controller.WebSocket.Upgrade,
 					})
 				})
 			})

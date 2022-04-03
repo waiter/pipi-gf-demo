@@ -45,7 +45,7 @@
         $("<div class=\"list-group-item list-group-item-danger\">" + content + "</div>").appendTo("#divShow")
     }
 
-    $(function () {
+    function doWebSocket() {
         var url = "ws://" + location.host + "/ws";
         var ws  = new WebSocket(url);
         try {
@@ -116,6 +116,23 @@
         $("#push").on("click", function () {
             fetch('/push').then((e) => console.log(e))
         });
+    }
+
+    $.ajax({
+        data: {
+            Passport: 'pipi',
+            Password: '123456',
+        },
+        url: '/user/sign-in',
+        method: 'POST'
+    }).then(res => {
+        console.log(res.data);
+        if (res.data.Id) {
+            showSuccess(res.data.Nickname + "，欢迎您！");
+            doWebSocket();
+        } else {
+            alert('登录失败！！！')
+        }
     })
 
 </script>

@@ -2,6 +2,7 @@ package v1
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"pipi.com/gogf/pipi-gf-demo/internal/model"
 	"pipi.com/gogf/pipi-gf-demo/internal/model/entity"
 )
 
@@ -26,7 +27,9 @@ type UserSignInReq struct {
 	Passport string `v:"required"`
 	Password string `v:"required"`
 }
-type UserSignInRes struct{}
+type UserSignInRes struct {
+	*model.ContextUser
+}
 
 type UserCheckPassportReq struct {
 	g.Meta   `path:"/user/check-passport" method:"post" tags:"UserService" summary:"Check passport available"`
