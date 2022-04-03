@@ -8,15 +8,15 @@ import (
 
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/net/gtcp"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gmlock"
 	"github.com/gogf/gf/v2/os/gtimer"
 	"pipi.com/gogf/pipi-gf-demo/internal/consts"
 )
 
-type WebConnection struct {
-	Socket    *ghttp.WebSocket
+type ClientConnection struct {
+	Socket    *gtcp.Conn
 	closed    bool
 	Unique    string
 	Ctx       context.Context
@@ -24,8 +24,8 @@ type WebConnection struct {
 	HeartBeat *gtimer.Entry
 }
 
-func CreateWebConnection(unique string, socket *ghttp.WebSocket, ctx context.Context, ctxClose func()) *WebConnection {
-	client := &WebConnection{
+func CreateClientConnection(unique string, socket *gtcp.Conn, ctx context.Context, ctxClose func()) *ClientConnection {
+	client := &ClientConnection{
 		Socket:    socket,
 		closed:    false,
 		Unique:    unique,
@@ -33,21 +33,21 @@ func CreateWebConnection(unique string, socket *ghttp.WebSocket, ctx context.Con
 		CtxClose:  ctxClose,
 		HeartBeat: nil,
 	}
-	client.HeartBeat = webheartbeat(client)
-	SocketManager.AddWebConnection(client)
+	client.HeartBeat = clientheartbeat(client)
+	SocketManager.AddClientConnection(client)
 	go client.read()
 	client.log("connected")
 	return client
 }
 
-func webheartbeat(client *WebConnection) *gtimer.Entry {
-	return gtimer.AddSingleton(client.Ctx, time.Second*consts.WebSocketHeartBeatTime, func(ctx context.Context) {
+func clientheartbeat(client *ClientConnection) *gtimer.Entry {
+	return gtimer.AddSingleton(client.Ctx, time.Second*consts.ClientSocketHeartBeatTime, func(ctx context.Context) {
 		client.log("heart beat close")
 		client.Close()
 	})
 }
 
-func (c *WebConnection) Close() {
+func (c *ClientConnection) Close() {
 	if gmlock.TryLock(c.Unique) {
 		if !c.closed {
 			_ = c.Socket.Close()
@@ -55,16 +55,16 @@ func (c *WebConnection) Close() {
 			//必须优先关闭读写协程
 			c.CtxClose()
 			c.HeartBeat.Close()
-			SocketManager.RemoveWebConnection(c)
+			SocketManager.RemoveClientConnection(c)
 			c.log("closed")
 		}
 		gmlock.Unlock(c.Unique)
 	}
 }
 
-func (c *WebConnection) read() {
+func (c *ClientConnection) read() {
 	for {
-		_, msg, err := c.Socket.ReadMessage()
+		msg, err := c.Socket.Recv(-1)
 		if err != nil {
 			c.log("read error")
 			c.Close()
@@ -85,7 +85,7 @@ func (c *WebConnection) read() {
 			c.writeError("no cmd:" + string(msg))
 			continue
 		}
-		result, err := CallWebLogic(cmd, data, c)
+		result, err := CallClientLogic(cmd, data, c)
 		if err != nil {
 			c.writeError(err.Error())
 			continue
@@ -94,19 +94,19 @@ func (c *WebConnection) read() {
 	}
 }
 
-func (c *WebConnection) write(msg []byte) {
-	err := c.Socket.WriteMessage(1, msg)
+func (c *ClientConnection) write(msg []byte) {
+	err := c.Socket.Send(msg)
 	if err != nil {
 		c.log("write error")
 		c.Close()
 	}
 }
 
-func (c *WebConnection) log(msg string) {
-	glog.Print(c.Ctx, "【WebSocket Connection】"+c.Unique+": "+msg)
+func (c *ClientConnection) log(msg string) {
+	glog.Print(c.Ctx, "【ClientSocket Connection】"+c.Unique+": "+msg)
 }
 
-func (c *WebConnection) WritePack(data g.Map) {
+func (c *ClientConnection) WritePack(data g.Map) {
 	data["pack"] = time.Now().Unix()
 	data["unique"] = c.Unique
 	encode, err := gjson.Encode(data)
@@ -116,7 +116,7 @@ func (c *WebConnection) WritePack(data g.Map) {
 	c.write(encode)
 }
 
-func (c *WebConnection) writeError(msg string) {
+func (c *ClientConnection) writeError(msg string) {
 	data := make(map[string]interface{})
 	data["cmd"] = "error"
 	data["msg"] = msg

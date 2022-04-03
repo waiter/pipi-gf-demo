@@ -6,18 +6,18 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-var webLogic = map[string]func(data *gjson.Json, c *WebConnection) (g.Map, error){
-	"testAdd": testAdd,
+var clientLogic = map[string]func(data *gjson.Json, c *ClientConnection) (g.Map, error){
+	"testAdd": testAddClient,
 }
 
-func CallWebLogic(cmd string, data *gjson.Json, c *WebConnection) (g.Map, error) {
-	if webLogic[cmd] != nil {
-		return webLogic[cmd](data, c)
+func CallClientLogic(cmd string, data *gjson.Json, c *ClientConnection) (g.Map, error) {
+	if clientLogic[cmd] != nil {
+		return clientLogic[cmd](data, c)
 	}
 	return nil, gerror.New("can't do cmd: " + cmd)
 }
 
-func testAdd(data *gjson.Json, c *WebConnection) (g.Map, error) {
+func testAddClient(data *gjson.Json, c *ClientConnection) (g.Map, error) {
 	info := data.Get("data").Ints()
 	back := g.Map{}
 	back["cmd"] = "add"

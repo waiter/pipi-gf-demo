@@ -1,14 +1,18 @@
 package socket
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+)
 
 type SocketManagerStruct struct {
-	WebSocket map[string]*WebConnection
+	WebSocket    map[string]*WebConnection
+	ClientSocket map[string]*ClientConnection
 }
 
 var (
 	SocketManager = &SocketManagerStruct{
-		WebSocket: map[string]*WebConnection{},
+		WebSocket:    map[string]*WebConnection{},
+		ClientSocket: map[string]*ClientConnection{},
 	}
 )
 
@@ -24,4 +28,12 @@ func (s *SocketManagerStruct) AddWebConnection(conn *WebConnection) {
 
 func (s *SocketManagerStruct) RemoveWebConnection(conn *WebConnection) {
 	delete(s.WebSocket, conn.Unique)
+}
+
+func (s *SocketManagerStruct) AddClientConnection(conn *ClientConnection) {
+	s.ClientSocket[conn.Unique] = conn
+}
+
+func (s *SocketManagerStruct) RemoveClientConnection(conn *ClientConnection) {
+	delete(s.ClientSocket, conn.Unique)
 }

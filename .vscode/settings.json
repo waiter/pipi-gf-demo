@@ -1,6 +1,7 @@
 {
   "cSpell.words": [
     "consts",
+    "gcfg",
     "gcmd",
     "gerror",
     "gfcli",
@@ -11,6 +12,7 @@
     "goai",
     "goframe",
     "gogf",
+    "gtcp",
     "gtime",
     "gtimer",
     "Newf",

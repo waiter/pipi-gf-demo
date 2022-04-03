@@ -7,6 +7,10 @@ server:
   openapiPath:         "/api.json"
   swaggerPath:         "/swagger"
 
+# Socket Server
+socket:
+  address:                ":8187"
+
 # Global logging.
 logger:
     level : "all"

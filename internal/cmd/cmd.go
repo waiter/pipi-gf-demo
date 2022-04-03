@@ -48,6 +48,8 @@ var (
 			})
 			// Custom enhance API document.
 			enhanceOpenAPIDoc(s)
+			// client socket server
+			controller.ClientSocket.Start()
 			// Just run the server.
 			s.Run()
 			return nil

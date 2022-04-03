@@ -91,3 +91,13 @@ git clone https://github.com/waiter/pipi-gf-demo
 {"cmd":"add","data":82,"pack":1648906839,"unique":"ws-RFbD56T"}
 ```
 另外，后端只需要在`internal/service/socket/webLogic.go`中添加相关逻辑即可
+
+## `ClientSocket`相关
+
+### 如何调试
+
+启动服务后，到`client`目录下`go run .`即可启动简易的逻辑。另外，`ClientSocket`的端口配置在`config.yaml`中
+
+### 其他
+
+其他设定与`WebSocket`基本一致

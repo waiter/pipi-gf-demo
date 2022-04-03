@@ -8,6 +8,10 @@ server:
   swaggerPath:         "/swagger"
   searchPaths:         "/static" 
 
+# Socket Server
+socket:
+  address:                ":8187"
+
 # Global logging.
 logger:
     level : "all"
