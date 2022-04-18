@@ -6,7 +6,9 @@ server:
   accessLogEnabled:    true
   openapiPath:         "/api.json"
   swaggerPath:         "/swagger"
-  searchPaths:         "/static" 
+  searchPaths:         "/static"
+  cookieSameSite:      "none"
+  cookieSecure:        true
 
 # Socket Server
 socket:

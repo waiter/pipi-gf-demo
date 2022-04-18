@@ -21,11 +21,13 @@ var (
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
 			s.Use(ghttp.MiddlewareHandlerResponse)
+			s.BindHandler("/ws", controller.WebSocket.Upgrade)
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				// Group middlewares.
 				group.Middleware(
 					service.Middleware().Ctx,
 					ghttp.MiddlewareCORS,
+					// service.Middleware().CORS,
 				)
 				// Register route handlers.
 				group.Bind(
@@ -43,7 +45,7 @@ var (
 					group.Middleware(service.Middleware().Auth)
 					group.ALLMap(g.Map{
 						"/user/profile": controller.User.Profile,
-						"/ws":           controller.WebSocket.Upgrade,
+						// "/ws":           controller.WebSocket.Upgrade,
 					})
 				})
 			})
